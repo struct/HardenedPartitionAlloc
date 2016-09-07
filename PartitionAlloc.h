@@ -222,7 +222,9 @@ static const size_t kReasonableSizeOfUnusedPages = 1024 * 1024 * 1024; // 1GiB
 static const unsigned char kUninitializedByte = 0xAB;
 static const unsigned char kFreedByte = 0xCD;
 static const size_t kCookieSize = 16; // Handles alignment up to XMM instructions on Intel.
-static const unsigned char kCookieValue[kCookieSize] = { 0xDE, 0xAD, 0xBE, 0xEF, 0xCA, 0xFE, 0xD0, 0x0D, 0x13, 0x37, 0xF0, 0x05, 0xBA, 0x11, 0xAB, 0x1E };
+//static const unsigned char kCookieValue[kCookieSize] = { 0xDE, 0xAD, 0xBE, 0xEF, 0xCA, 0xFE, 0xD0, 0x0D, 0x13, 0x37, 0xF0, 0x05, 0xBA, 0x11, 0xAB, 0x1E };
+static bool kCookieInitialized = false;
+static unsigned char kCookieValue[kCookieSize] = { 0x0 };
 #endif
 
 struct PartitionBucket;
@@ -469,8 +471,9 @@ ALWAYS_INLINE void partitionCookieWriteValue(void* ptr)
 {
 #if ENABLE(ASSERT)
     unsigned char* cookiePtr = reinterpret_cast<unsigned char*>(ptr);
-    for (size_t i = 0; i < kCookieSize; ++i, ++cookiePtr)
+    for (size_t i = 0; i < kCookieSize; ++i, ++cookiePtr) {
         *cookiePtr = kCookieValue[i];
+    }
 #endif
 }
 
@@ -478,8 +481,9 @@ ALWAYS_INLINE void partitionCookieCheckValue(void* ptr)
 {
 #if ENABLE(ASSERT)
     unsigned char* cookiePtr = reinterpret_cast<unsigned char*>(ptr);
-    for (size_t i = 0; i < kCookieSize; ++i, ++cookiePtr)
+    for (size_t i = 0; i < kCookieSize; ++i, ++cookiePtr) {
         RELEASE_ASSERT_WITH_SECURITY_IMPLICATION(*cookiePtr == kCookieValue[i]);
+    }
 #endif
 }
 
@@ -861,7 +865,16 @@ class SizeSpecificPartitionAllocator {
 public:
     static const size_t kMaxAllocation = N - kAllocationGranularity;
     static const size_t kNumBuckets = N / kAllocationGranularity;
-    void init() { partitionAllocInit(&m_partitionRoot, kNumBuckets, kMaxAllocation); }
+    void init() {
+        partitionAllocInit(&m_partitionRoot, kNumBuckets, kMaxAllocation);
+
+        if(kCookieInitialized == false) {
+            for(int i = 0; i < kCookieSize; i++) {
+                kCookieValue[i] = (unsigned char) _rand(255);
+            }
+            kCookieInitialized = true;
+        }
+    }
     bool shutdown() { return partitionAllocShutdown(&m_partitionRoot); }
     ALWAYS_INLINE PartitionRoot* root() { return &m_partitionRoot; }
 private:
@@ -871,7 +884,16 @@ private:
 
 class PartitionAllocatorGeneric {
 public:
-    void init() { partitionAllocGenericInit(&m_partitionRoot); }
+    void init() {
+        partitionAllocGenericInit(&m_partitionRoot);
+
+        if(kCookieInitialized == false) {
+            for(int i = 0; i < kCookieSize; i++) {
+                kCookieValue[i] = (unsigned char) _rand(255);
+            }
+            kCookieInitialized = true;
+        }
+    }
     bool shutdown() { return partitionAllocGenericShutdown(&m_partitionRoot); }
     ALWAYS_INLINE PartitionRootGeneric* root() { return &m_partitionRoot; }
 private:
@@ -900,6 +922,9 @@ using WTF::partitionAllocGetSize;
 extern "C" {
 
 // Size specific partitions (bins) for common allocations
+// These templates define the maximum size allocation that
+// can occur within them. We account for the kCookieSize*2
+// because cookies are enabled within user allocations
 SizeSpecificPartitionAllocator<64+(WTF::kCookieSize*2)>  _PA;
 SizeSpecificPartitionAllocator<128+(WTF::kCookieSize*2)> __PA;
 SizeSpecificPartitionAllocator<256+(WTF::kCookieSize*2)> ___PA;
@@ -975,17 +1000,17 @@ void *partition_malloc_sz(size_t sz) {
     return NULL;
 }
 
-// The correct page is derived from the pointer
+// The correct page structure is derived from the pointer
 void partition_free_sz(void *ptr) {
     partitionFree(ptr);
 }
 
-// Allocate memory for strings
+// Allocate memory for a string
 void *partition_malloc_string(size_t sz) {
     return partitionAllocGeneric(g_string_partition.root(), sz);
 }
 
-// Free memory for strings
+// Free memory for a string
 void partition_free_string(void *ptr) {
     partitionFreeGeneric(g_string_partition.root(), ptr);
 }
