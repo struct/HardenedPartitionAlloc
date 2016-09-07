@@ -1,3 +1,7 @@
+# Introduction
+
+This is a standalone library containing PartitionAlloc. It needs a lot of work and testing before it should be used on production code.
+
 # PartitionAlloc
 
 This is a fork of the PartitionAlloc code from Chrome's Blink engine. If you're not familiar with PartitionAlloc go read [this](http://struct.github.io/partition_alloc.html). The TLDR is that PartitionAlloc is a heap allocator that segments allocations based on size or type. This provides the ability to separate sensitive data structures from those tainted by user inputs if the API is used correctly. The PartitionAlloc developers offer the following security guarantees:
