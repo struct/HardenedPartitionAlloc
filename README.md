@@ -48,3 +48,9 @@ The following additional things have been added:
 # Usage
 
 Type `make test` and then run `build/pa_test`. The pa_test.cpp program will show you the basics of using the C API.
+
+# Who
+
+The fork of PartitionAlloc and hardening patches are maintained by Chris Rohlf chris.rohlf@gmail.com
+
+The original PartitionAlloc (Google) and WebKit (Apple, Google) code are copyrighted by their respective authors. All licenses and code headers have been preserved.
