@@ -17,7 +17,10 @@ DEBUG = -ggdb
 ASAN = -fsanitize=address
 LDFLAGS =
 
-library:
+prepare:
+	mkdir build
+
+library: prepare
 	$(CXX) $(CXXFLAGS) $(DEBUG) AddressSpaceRandomization.cpp Assertions.cpp PageAllocator.cpp \
 		PartitionAlloc.cpp -shared $(LDFLAGS) -o build/partitionalloc.so
 
