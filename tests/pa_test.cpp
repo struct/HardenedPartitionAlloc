@@ -3,8 +3,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <vector>
-#include "config.h"
-#include "PartitionAlloc.h"
+#include "../PartitionAlloc.h"
 
 PartitionAllocatorGeneric my_partition;
 
