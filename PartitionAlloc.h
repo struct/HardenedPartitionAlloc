@@ -223,8 +223,6 @@ static const unsigned char kUninitializedByte = 0xAB;
 static const unsigned char kFreedByte = 0xCD;
 static const size_t kCookieSize = 16; // Handles alignment up to XMM instructions on Intel.
 //static const unsigned char kCookieValue[kCookieSize] = { 0xDE, 0xAD, 0xBE, 0xEF, 0xCA, 0xFE, 0xD0, 0x0D, 0x13, 0x37, 0xF0, 0x05, 0xBA, 0x11, 0xAB, 0x1E };
-static bool kCookieInitialized = false;
-static unsigned char kCookieValue[kCookieSize] = { 0x0 };
 #endif
 
 struct PartitionBucket;
@@ -326,6 +324,11 @@ struct WTF_EXPORT PartitionRootBase {
     size_t delayed_free_list_max_sz;
     // A pointer to a vector of pointers we are waiting to free()
     std::vector<void *> delayed_free_list;
+
+    // User heap allocations have a canary before them
+    // This canary value is per-partition-root
+    bool kCookieInitialized;
+    unsigned char kCookieValue[WTF::kCookieSize];
 };
 
 // Never instantiate a PartitionRoot directly, instead use PartitionAlloc.
@@ -467,22 +470,31 @@ ALWAYS_INLINE void* partitionCookieFreePointerAdjust(void* ptr)
     return ptr;
 }
 
-ALWAYS_INLINE void partitionCookieWriteValue(void* ptr)
+ALWAYS_INLINE PartitionPage* partitionPointerToPage(void* ptr);
+ALWAYS_INLINE PartitionRootBase* partitionPageToRoot(PartitionPage* page)
+{
+    PartitionSuperPageExtentEntry* extentEntry = reinterpret_cast<PartitionSuperPageExtentEntry*>(reinterpret_cast<uintptr_t>(page) & kSystemPageBaseMask);
+    return extentEntry->root;
+}
+
+ALWAYS_INLINE void partitionCookieWriteValue(void* ptr, PartitionPage *page)
 {
 #if ENABLE(ASSERT)
     unsigned char* cookiePtr = reinterpret_cast<unsigned char*>(ptr);
+    PartitionRootBase* root = partitionPageToRoot(page);
     for (size_t i = 0; i < kCookieSize; ++i, ++cookiePtr) {
-        *cookiePtr = kCookieValue[i];
+        *cookiePtr = root->kCookieValue[i];
     }
 #endif
 }
 
-ALWAYS_INLINE void partitionCookieCheckValue(void* ptr)
+ALWAYS_INLINE void partitionCookieCheckValue(void* ptr, PartitionPage *page)
 {
 #if ENABLE(ASSERT)
     unsigned char* cookiePtr = reinterpret_cast<unsigned char*>(ptr);
+    PartitionRootBase* root = partitionPageToRoot(page);
     for (size_t i = 0; i < kCookieSize; ++i, ++cookiePtr) {
-        RELEASE_ASSERT_WITH_SECURITY_IMPLICATION(*cookiePtr == kCookieValue[i]);
+        RELEASE_ASSERT_WITH_SECURITY_IMPLICATION(*cookiePtr == root->kCookieValue[i]);
     }
 #endif
 }
@@ -573,12 +585,6 @@ ALWAYS_INLINE size_t partitionPageGetRawSize(PartitionPage* page)
     return 0;
 }
 
-ALWAYS_INLINE PartitionRootBase* partitionPageToRoot(PartitionPage* page)
-{
-    PartitionSuperPageExtentEntry* extentEntry = reinterpret_cast<PartitionSuperPageExtentEntry*>(reinterpret_cast<uintptr_t>(page) & kSystemPageBaseMask);
-    return extentEntry->root;
-}
-
 ALWAYS_INLINE bool partitionPointerIsValid(void* ptr)
 {
     PartitionPage* page = partitionPointerToPage(ptr);
@@ -645,8 +651,8 @@ ALWAYS_INLINE void* partitionBucketAlloc(PartitionRootBase* root, int flags, siz
     // The value given to the application is actually just after the cookie.
     ret = charRet + kCookieSize;
     memset(ret, kUninitializedByte, noCookieSize);
-    partitionCookieWriteValue(charRet);
-    partitionCookieWriteValue(charRet + kCookieSize + noCookieSize);
+    partitionCookieWriteValue(charRet, page);
+    partitionCookieWriteValue(charRet + kCookieSize + noCookieSize, page);
 #endif
     return ret;
 }
@@ -702,8 +708,8 @@ ALWAYS_INLINE void partitionFreeWithPage(void* ptr, PartitionPage* page, bool de
         size_t rawSize = partitionPageGetRawSize(page);
         if (rawSize)
             slotSize = rawSize;
-        partitionCookieCheckValue(ptr);
-        partitionCookieCheckValue(reinterpret_cast<char*>(ptr) + slotSize - kCookieSize);
+        partitionCookieCheckValue(ptr, page);
+        partitionCookieCheckValue(reinterpret_cast<char*>(ptr) + slotSize - kCookieSize, page);
         memset(ptr, kFreedByte, slotSize);
     }
 #endif
@@ -865,16 +871,7 @@ class SizeSpecificPartitionAllocator {
 public:
     static const size_t kMaxAllocation = N - kAllocationGranularity;
     static const size_t kNumBuckets = N / kAllocationGranularity;
-    void init() {
-        partitionAllocInit(&m_partitionRoot, kNumBuckets, kMaxAllocation);
-
-        if(kCookieInitialized == false) {
-            for(int i = 0; i < kCookieSize; i++) {
-                kCookieValue[i] = (unsigned char) _rand(255);
-            }
-            kCookieInitialized = true;
-        }
-    }
+    void init() { partitionAllocInit(&m_partitionRoot, kNumBuckets, kMaxAllocation); }
     bool shutdown() { return partitionAllocShutdown(&m_partitionRoot); }
     ALWAYS_INLINE PartitionRoot* root() { return &m_partitionRoot; }
 private:
@@ -884,16 +881,7 @@ private:
 
 class PartitionAllocatorGeneric {
 public:
-    void init() {
-        partitionAllocGenericInit(&m_partitionRoot);
-
-        if(kCookieInitialized == false) {
-            for(int i = 0; i < kCookieSize; i++) {
-                kCookieValue[i] = (unsigned char) _rand(255);
-            }
-            kCookieInitialized = true;
-        }
-    }
+    void init() { partitionAllocGenericInit(&m_partitionRoot); }
     bool shutdown() { return partitionAllocGenericShutdown(&m_partitionRoot); }
     ALWAYS_INLINE PartitionRootGeneric* root() { return &m_partitionRoot; }
 private:

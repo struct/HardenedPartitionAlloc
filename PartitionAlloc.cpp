@@ -133,6 +133,10 @@ static void parititonAllocBaseInit(PartitionRootBase* root)
     memset(&root->globalEmptyPageRing, '\0', sizeof(root->globalEmptyPageRing));
     root->globalEmptyPageRingIndex = 0;
 
+    for(int i = 0; i < kCookieSize; i++) {
+        root->kCookieValue[i] = (unsigned char) _rand(255);
+    }
+
     // This is a "magic" value so we can test if a root pointer is valid.
     root->invertedSelf = ~reinterpret_cast<uintptr_t>(root);
 }
@@ -1072,7 +1076,7 @@ bool partitionReallocDirectMappedInPlace(PartitionRootGeneric* root, PartitionPa
 
 #if ENABLE(ASSERT)
     // Write a new trailing cookie.
-    partitionCookieWriteValue(charPtr + rawSize - kCookieSize);
+    partitionCookieWriteValue(charPtr + rawSize - kCookieSize, page);
 #endif
 
     partitionPageSetRawSize(page, rawSize);
