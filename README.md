@@ -64,4 +64,4 @@ This is a work in progress and I would like to reach a stable release at some po
 
 The fork of PartitionAlloc and hardening patches are maintained by Chris Rohlf chris.rohlf@gmail.com
 
-The original PartitionAlloc (Google) and WebKit (Apple, Google) code are copyrighted by their respective authors. All licenses and code headers have been preserved.
+The original PartitionAlloc (Google) and WebKit (Apple, Google) code are copyrighted by their respective authors. All licenses and code copyright headers have been preserved.
