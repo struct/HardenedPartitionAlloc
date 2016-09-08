@@ -631,7 +631,15 @@ ALWAYS_INLINE void* partitionBucketAlloc(PartitionRootBase* root, int flags, siz
             ret = t;
         } else {
             ret = page->freelistHead;
-            // If this assert fires, you probably corrupted memory.
+            // Ensure that t and page mask to the same base address.
+            // This should catch most corruptions of the freelist
+            // where the value is not explicitly controlled or
+            // informed from a prior memory disclosure
+            RELEASE_ASSERT_WITH_SECURITY_IMPLICATION(((uintptr_t) ret & (uintptr_t) kSuperPageBaseMask) == ((uintptr_t) page & (uintptr_t) kSuperPageBaseMask));
+
+            // This check will ensure we can mask to a valid page
+            // pointer from the user pointer. This also checks the
+            // root pointer has a valid inverted self
             RELEASE_ASSERT_WITH_SECURITY_IMPLICATION(partitionPointerIsValid(ret));
         }
 
