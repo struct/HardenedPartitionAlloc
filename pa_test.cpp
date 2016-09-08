@@ -47,29 +47,21 @@ void run_test() {
 	// for the canary value
 	for(int i = 0; i < 512; i++) {
 		p = partition_malloc_sz(64);
-		// We expect this allocation to fail at some point
-		// because of size+cookie > bucket size
 		partition_free_sz(p);
 	}
 
 	for(int i = 0; i < 512; i++) {
 		p = partition_malloc_sz(128);
-		// We expect this allocation to fail at some point
-		// because of size+cookie > bucket size
 		partition_free_sz(p);
 	}
 
 	for(int i = 0; i < 512; i++) {
 		p = partition_malloc_sz(256);
-		// We expect this allocation to fail at some point
-		// because of size+cookie > bucket size
 		partition_free_sz(p);
 	}
 
 	for(int i = 0; i < 512; i++) {
 		p = partition_malloc_sz(512);
-		// We expect this allocation to fail at some point
-		// because of size+cookie > bucket size
 		partition_free_sz(p);
 	}
 

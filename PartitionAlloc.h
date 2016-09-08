@@ -606,19 +606,28 @@ ALWAYS_INLINE void* partitionBucketAlloc(PartitionRootBase* root, int flags, siz
             if((rand() % 10) == 1) {
                 break;
             }
-
             z = t;
             t = partitionFreelistMask(t->next);
+
+            if(t == NULL) {
+                break;
+            }
+
+            // Ensure that t and page mask to the same base address
+            RELEASE_ASSERT_WITH_SECURITY_IMPLICATION(((uintptr_t) t & (uintptr_t) kSuperPageBaseMask) == ((uintptr_t) page & (uintptr_t) kSuperPageBaseMask));
+            RELEASE_ASSERT_WITH_SECURITY_IMPLICATION(partitionPointerToPage(t));
+            // If this assert fires, you probably corrupted memory.
+            RELEASE_ASSERT_WITH_SECURITY_IMPLICATION(partitionPointerIsValid(t));
         }
 
         if(t) {
             ret = t;
         } else {
             ret = page->freelistHead;
+            // If this assert fires, you probably corrupted memory.
+            RELEASE_ASSERT_WITH_SECURITY_IMPLICATION(partitionPointerIsValid(ret));
         }
 
-        // If these asserts fire, you probably corrupted memory.
-        RELEASE_ASSERT_WITH_SECURITY_IMPLICATION(partitionPointerIsValid(ret));
         // All large allocations must go through the slow path to correctly
         // update the size metadata.
         RELEASE_ASSERT_WITH_SECURITY_IMPLICATION(partitionPageGetRawSize(page) == 0);
