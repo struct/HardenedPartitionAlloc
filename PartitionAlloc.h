@@ -689,11 +689,20 @@ ALWAYS_INLINE void partitionFreeWithPage(void* ptr, PartitionPage* page, bool de
     if(delay == true) {
         PartitionRootBase *prb = partitionPageToRoot(page);
 
+        // Make sure the pointer is not already on our delayed
+        // free list. Assert if it is
         for(auto p : prb->delayed_free_list) {
             RELEASE_ASSERT_WITH_SECURITY_IMPLICATION(p != ptr);
         }
 
         if(prb->delayed_free_list.size() < prb->delayed_free_list_max_sz) {
+            size_t rawSize = partitionPageGetRawSize(page);
+            size_t slotSize = page->bucket->slotSize;
+            if (rawSize)
+                slotSize = rawSize;
+            // Destroy the user data before adding the pointer
+            // to the delayed free list
+            memset(reinterpret_cast<char*>(ptr) + kCookieSize, kFreedByte, slotSize-(kCookieSize*2));
             prb->delayed_free_list.push_back(ptr);
             return;
         } else {
@@ -708,20 +717,15 @@ ALWAYS_INLINE void partitionFreeWithPage(void* ptr, PartitionPage* page, bool de
 
     // If these asserts fire, you probably corrupted memory.
 #if ENABLE(ASSERT)
-    // delay may be false when we are just killing
-    // the entire partition root and want to free
-    // all existing slots. Those slots may have
-    // already been through this code path and had
-    // their cookies checked
-    if(delay == true) {
-        size_t slotSize = page->bucket->slotSize;
-        size_t rawSize = partitionPageGetRawSize(page);
-        if (rawSize)
-            slotSize = rawSize;
-        partitionCookieCheckValue(ptr, page);
-        partitionCookieCheckValue(reinterpret_cast<char*>(ptr) + slotSize - kCookieSize, page);
-        memset(ptr, kFreedByte, slotSize);
-    }
+    size_t rawSize = partitionPageGetRawSize(page);
+    size_t slotSize = page->bucket->slotSize;
+    if (rawSize)
+        slotSize = rawSize;
+    // Canary values should be intact even though user data
+    // was previously memset
+    partitionCookieCheckValue(ptr, page);
+    partitionCookieCheckValue(reinterpret_cast<char*>(ptr) + slotSize - kCookieSize, page);
+    memset(ptr, kFreedByte, slotSize);
 #endif
 
     RELEASE_ASSERT_WITH_SECURITY_IMPLICATION(page->numAllocatedSlots);

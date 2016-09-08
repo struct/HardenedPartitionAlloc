@@ -23,8 +23,13 @@ PartitionAlloc provides some good security against heap exploits right out of th
 	* Randomization of the freelist upon creation
 	* Freelist entries are randomly selected upon allocation
 	* Better double free detection upon free
-	* All calls to ASSERT have been replaced with ASSERT_WITH_SECURITY_IMPLICATION and enabled by default
 	* Delayed free via a vector stored with the partition root
+
+All calls to ASSERT have been replaced with ASSERT_WITH_SECURITY_IMPLICATION and enabled by default. This means the following additional security checks are enabled:
+
+	* User allocations are preceeded by a canary value that is unique per-partition
+	* New allocations are memset with 0xAB
+	* Free'd allocations are memset (but their canary values preserved) before they're added to delayed free list
 
 # Other additions
 
@@ -59,6 +64,8 @@ This is a work in progress and I would like to reach a stable release at some po
 
 	* Improved delayed free implementation
 	* More efficient double free detection
+	* Document other security relevant asserts
+	* Research [https://github.com/struct/HardenedPartitionAlloc/issues/1](memalign)
 
 # Who
 
