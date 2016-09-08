@@ -28,4 +28,4 @@ test: library
 	$(CXX) $(CXXFLAGS) $(DEBUG) pa_test.cpp build/partitionalloc.so -o build/pa_test
 
 clean:
-	rm -rf */*.o build/*
+	rm -rf */*.o build/* ; rm -rf build
