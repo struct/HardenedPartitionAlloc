@@ -25,7 +25,7 @@ library: prepare
 		PartitionAlloc.cpp -shared $(LDFLAGS) -o build/partitionalloc.so
 
 test: library
-	$(CXX) $(CXXFLAGS) $(DEBUG) pa_test.cpp build/partitionalloc.so -o build/pa_test
+	$(CXX) $(CXXFLAGS) $(DEBUG) tests/pa_test.cpp build/partitionalloc.so -o build/pa_test
 
 clean:
 	rm -rf */*.o build/* ; rm -rf build
