@@ -30,18 +30,18 @@ PartitionAlloc provides some good security against heap exploits right out of th
 
 This fork also includes a basic C API with the following interfaces:
 
-	* new_generic_partition() - Returns a void pointer to a PartitionAllocatorGeneric class
-	* generic_partition_alloc(void *r, size_t s) - Returns an allocation from a PartitionAllocatorGeneric root r of size s
-	* generic_partition_free(void *r, void *a) - Frees an allocation a from a root r
-	* delete_generic_partition(void *r) - Deletes a PartitionAllocatorGeneric r
-	* partitionalloc_init() - Initializes all global partitions used in the C interface
-	* partitionalloc_shutdown() Shuts down all global partitions used in the C interface
-	* partition_malloc_sz(size_t s) - Allocates s bytes from a global size specific partition
-	* partition_free_sz(void *p) - Free a memory allocation p from a global size specific partition
-	* partition_malloc_string(size_t s) - Allocates s bytes from a global partition specifically for strings
-	* partition_free_string(void *p) - Frees a memory allocation p from a global partition specifically for strings
-	* partition_malloc(size_t s) - Allocates s bytes from a global generic partition
-	* partition_free(void *p) - Frees a memory allocation p from a global generic partition
+	* void *new_generic_partition() - Returns a void pointer to a PartitionAllocatorGeneric class
+	* void *generic_partition_alloc(void *r, size_t s) - Returns an allocation from a PartitionAllocatorGeneric root r of size s
+	* void generic_partition_free(void *r, void *a) - Frees an allocation a from a root r
+	* void delete_generic_partition(void *r) - Deletes a PartitionAllocatorGeneric r
+	* void partitionalloc_init() - Initializes all global partitions used in the C interface
+	* void partitionalloc_shutdown() Shuts down all global partitions used in the C interface
+	* void *partition_malloc_sz(size_t s) - Allocates s bytes from a global size specific partition
+	* void partition_free_sz(void *p) - Free a memory allocation p from a global size specific partition
+	* void *partition_malloc_string(size_t s) - Allocates s bytes from a global partition specifically for strings
+	* void partition_free_string(void *p) - Frees a memory allocation p from a global partition specifically for strings
+	* void *partition_malloc(size_t s) - Allocates s bytes from a global generic partition
+	* void partition_free(void *p) - Frees a memory allocation p from a global generic partition
 
 The following additional things have been added:
 
@@ -52,6 +52,13 @@ The following additional things have been added:
 # Usage
 
 Type `make test` and then run `build/pa_test`. The pa_test.cpp program will show you the basics of using the C API.
+
+# Todo
+
+This is a work in progress and I would like to reach a stable release at some point soon. The goal is for it to be packaged for popular Linux distributions and actually used in production.
+
+	* Improved delayed free implementation
+	* More efficient double free detection
 
 # Who
 
