@@ -1,3 +1,5 @@
+// This serves as an example of how to use the various
+// C/C++ APIs that ship with Hardened PartitionAlloc
 #include <stdio.h>
 #include <stdlib.h>
 #include <vector>
@@ -42,26 +44,27 @@ void run_test() {
 	partitionFreeGeneric(my_partition.root(), p);
 	my_partition.shutdown();
 
-	// These allocations will fail before 512
-	// is reached because we build in sizes
-	// for the canary value
 	for(int i = 0; i < 512; i++) {
 		p = partition_malloc_sz(64);
+		ASSERT(p);
 		partition_free_sz(p);
 	}
 
 	for(int i = 0; i < 512; i++) {
 		p = partition_malloc_sz(128);
+		ASSERT(p);
 		partition_free_sz(p);
 	}
 
 	for(int i = 0; i < 512; i++) {
 		p = partition_malloc_sz(256);
+		ASSERT(p);
 		partition_free_sz(p);
 	}
 
-	for(int i = 0; i < 512; i++) {
+	for(int i = 0; i < 32; i++) {
 		p = partition_malloc_sz(512);
+		ASSERT(p);
 		partition_free_sz(p);
 	}
 

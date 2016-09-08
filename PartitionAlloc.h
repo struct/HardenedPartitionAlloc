@@ -922,10 +922,10 @@ extern "C" {
 // These templates define the maximum size allocation that
 // can occur within them. We account for the kCookieSize*2
 // because cookies are enabled within user allocations
-SizeSpecificPartitionAllocator<64+(WTF::kCookieSize*2)>  _PA;
-SizeSpecificPartitionAllocator<128+(WTF::kCookieSize*2)> __PA;
-SizeSpecificPartitionAllocator<256+(WTF::kCookieSize*2)> ___PA;
-SizeSpecificPartitionAllocator<512+(WTF::kCookieSize*2)> ____PA;
+SizeSpecificPartitionAllocator<64+(WTF::kCookieSize*2)+8>  _PA;
+SizeSpecificPartitionAllocator<128+(WTF::kCookieSize*2)+8> __PA;
+SizeSpecificPartitionAllocator<256+(WTF::kCookieSize*2)+8> ___PA;
+SizeSpecificPartitionAllocator<512+(WTF::kCookieSize*2)+8> ____PA;
 
 // Generic partition for strings
 PartitionAllocatorGeneric g_string_partition;
@@ -984,13 +984,13 @@ void partitionalloc_shutdown() {
 void *partition_malloc_sz(size_t sz) {
     // kCookie size is already accounted for in our
     // size specific partition templates
-    if(sz < 64) {
+    if(sz <= 64) {
         return partitionAlloc(_PA.root(), sz);
-    } else if(sz < 128) {
+    } else if(sz <= 128) {
         return partitionAlloc(__PA.root(), sz);
-    } else if(sz < 256) {
+    } else if(sz <= 256) {
         return partitionAlloc(___PA.root(), sz);
-    } else if(sz < 512) {
+    } else if(sz <= 512) {
         return partitionAlloc(____PA.root(), sz);
     }
 
