@@ -20,15 +20,12 @@ This is a fork of the PartitionAlloc code from Chrome's Blink engine. If you're 
 
 PartitionAlloc provides some good security against heap exploits right out of the box. However there is always room for improvement. Many additional security mechanisms can be enabled if performance is not an issue. And that is precisely what I have done with this fork of the code. Some of these have been documented [here](http://struct.github.io/partition_alloc.html). The following changes have been made to the original PartitionAlloc code base:
 
-	* Randomization of the freelist upon creation
-	* Freelist entries are randomly selected upon allocation
-	* Better double free detection upon free
-	* Delayed free via a vector stored with the partition root
-
 All calls to ASSERT have been replaced with ASSERT_WITH_SECURITY_IMPLICATION and enabled by default. This means the following additional security checks are enabled:
 
 ## Allocate
 
+	* Randomization of the freelist upon creation
+	* Freelist entries are randomly selected upon allocation
 	* Allocations are preceeded by a canary value that is unique per-partition
 	* New allocations are memset with 0xAB
 	* All freelist pointers are checked for a valid page mask and root inverted self value
@@ -36,6 +33,8 @@ All calls to ASSERT have been replaced with ASSERT_WITH_SECURITY_IMPLICATION and
 ## Free
 
 	* Free'd allocations have their user data memset before they're added to delayed free list
+	* Better double free detection upon free
+	* Delayed free via a vector stored with the partition root
 
 # Other additions
 
