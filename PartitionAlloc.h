@@ -948,10 +948,10 @@ static SizeSpecificPartitionAllocator<256+(WTF::kCookieSize*2)+8> ___PA;
 static SizeSpecificPartitionAllocator<512+(WTF::kCookieSize*2)+8> ____PA;
 
 // Generic partition for strings
-PartitionAllocatorGeneric g_string_partition;
+static PartitionAllocatorGeneric g_string_partition;
 
 // Generic object partition for other objects
-PartitionAllocatorGeneric g_other_partition;
+static PartitionAllocatorGeneric g_other_partition;
 
 // C wrapper for creating a generic partition
 void *new_generic_partition() {
