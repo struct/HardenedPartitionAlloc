@@ -1,6 +1,6 @@
 # Introduction
 
-This is a standalone library containing PartitionAlloc. It needs a lot of work and testing before it should be used on production code.
+This is a standalone library containing PartitionAlloc. It needs a lot of work and testing before it should be used on production code. This code is changing rapidly and should be considered unstable and untested until this notice is removed.
 
 # PartitionAlloc
 
@@ -18,9 +18,9 @@ This is a fork of the PartitionAlloc code from Chrome's Blink engine. If you're 
 
 # Hardening
 
-PartitionAlloc provides some good security against heap exploits right out of the box. However there is always room for improvement. Many additional security mechanisms can be enabled if performance is not an issue. And that is precisely what I have done with this fork of the code. Some of these have been documented [here](http://struct.github.io/partition_alloc.html). The following changes have been made to the original PartitionAlloc code base:
+PartitionAlloc provides some good security against heap exploits right out of the box. However there is always room for improvement. Many additional security mechanisms can be enabled if performance is not an issue. And that is precisely what I have done with this fork of the code. Some of these have been documented [here](http://struct.github.io/partition_alloc.html). All calls to ASSERT have been replaced with ASSERT_WITH_SECURITY_IMPLICATION and enabled by default. This has obvious performance penalities.
 
-All calls to ASSERT have been replaced with ASSERT_WITH_SECURITY_IMPLICATION and enabled by default. This means the following additional security checks are enabled:
+The following changes have been made to the original PartitionAlloc code base.
 
 ## Allocate
 
@@ -70,7 +70,7 @@ This is a work in progress and I would like to reach a stable release at some po
 	* Improved delayed free implementation
 	* More efficient double free detection
 	* Document other security relevant asserts
-	* Research [https://github.com/struct/HardenedPartitionAlloc/issues/1](memalign)
+	* Research memalign support https://github.com/struct/HardenedPartitionAlloc/issues/1
 
 # Who
 
