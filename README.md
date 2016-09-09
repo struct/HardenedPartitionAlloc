@@ -27,7 +27,7 @@ The following changes have been made to the original PartitionAlloc code base.
 	* Randomization of the freelist upon creation
 	* Freelist entries are randomly selected upon allocation
 	* Allocations are preceeded by a canary value that is unique per-partition
-	* New allocations are memset with 0xAB
+	* New allocations are memset with 0xDE
 	* All freelist pointers are checked for a valid page mask and root inverted self value
 
 ## Free
