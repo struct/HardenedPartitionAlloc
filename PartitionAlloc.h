@@ -220,7 +220,7 @@ static const size_t kReasonableSizeOfUnusedPages = 1024 * 1024 * 1024; // 1GiB
 
 #if ENABLE(ASSERT)
 // These two byte values match tcmalloc.
-static const unsigned char kUninitializedByte = 0xAB;
+static const unsigned char kUninitializedByte = 0xDE;
 static const unsigned char kFreedByte = 0xDF;
 static const size_t kCookieSize = 16; // Handles alignment up to XMM instructions on Intel.
 //static const unsigned char kCookieValue[kCookieSize] = { 0xDE, 0xAD, 0xBE, 0xEF, 0xCA, 0xFE, 0xD0, 0x0D, 0x13, 0x37, 0xF0, 0x05, 0xBA, 0x11, 0xAB, 0x1E };
