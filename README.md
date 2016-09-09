@@ -27,9 +27,15 @@ PartitionAlloc provides some good security against heap exploits right out of th
 
 All calls to ASSERT have been replaced with ASSERT_WITH_SECURITY_IMPLICATION and enabled by default. This means the following additional security checks are enabled:
 
-	* User allocations are preceeded by a canary value that is unique per-partition
+## Allocate
+
+	* Allocations are preceeded by a canary value that is unique per-partition
 	* New allocations are memset with 0xAB
-	* Free'd allocations are memset (but their canary values preserved) before they're added to delayed free list
+	* All freelist pointers are checked for a valid page mask and root inverted self value
+
+## Free
+
+	* Free'd allocations have their user data memset before they're added to delayed free list
 
 # Other additions
 
@@ -72,3 +78,9 @@ This is a work in progress and I would like to reach a stable release at some po
 The fork of PartitionAlloc and hardening patches are maintained by Chris Rohlf chris.rohlf@gmail.com
 
 The original PartitionAlloc (Google) and WebKit (Apple, Google) code are copyrighted by their respective authors. All licenses and code copyright headers have been preserved.
+
+# Thanks
+
+The following people are owed a thank you for their suggestions and ideas:
+
+[CopperheadOS](https://twitter.com/copperheados)
