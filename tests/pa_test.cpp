@@ -5,8 +5,6 @@
 #include <vector>
 #include "../PartitionAlloc.h"
 
-PartitionAllocatorGeneric my_partition;
-
 class MyClass : public PartitionBackedBase {
   public:
 	MyClass() {
@@ -38,6 +36,7 @@ class MyClass : public PartitionBackedBase {
 
 void run_test() {
 	// PartitionAlloc API test with global root
+	PartitionAllocatorGeneric my_partition;
 	my_partition.init();
 	void *p = partitionAllocGeneric(my_partition.root(), 16);
 	partitionFreeGeneric(my_partition.root(), p);
@@ -86,11 +85,6 @@ void run_test() {
 	ASSERT(p);
 	generic_partition_free(gp, p);
 	delete_generic_partition(gp);
-
-	// Allocate some memory with glibc ptmalloc2
-	void *t = malloc(1024);
-	ASSERT(t);
-	free(t);
 }
 
 int main(int argc, char *argv[]) {

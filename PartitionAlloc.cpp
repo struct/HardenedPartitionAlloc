@@ -153,7 +153,6 @@ static void partitionBucketInitBase(PartitionBucket* bucket, PartitionRootBase* 
 void partitionAllocInit(PartitionRoot* root, size_t numBuckets, size_t maxAllocation)
 {
     parititonAllocBaseInit(root);
-
     root->numBuckets = numBuckets;
     root->maxAllocation = maxAllocation;
     size_t i;

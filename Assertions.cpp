@@ -66,6 +66,10 @@
 #include <execinfo.h>
 #endif
 
+#if OS(LINUX)
+#include <dlfcn.h>
+#endif
+
 #if OS(ANDROID)
 #include <android/log.h>
 #endif
