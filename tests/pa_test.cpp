@@ -68,6 +68,7 @@ void run_test() {
 
 	p = partition_malloc_string(128);
 	ASSERT(p);
+	check_partition_pointer(p);
 	p = partition_realloc_string(p, 128);
 	ASSERT(p);
 	partition_free_string(p);

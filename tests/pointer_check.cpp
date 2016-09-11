@@ -1,11 +1,7 @@
-// This is an example of a linear heap overflow
-// that should get caught by a security assert
 #include <stdio.h>
 #include <stdlib.h>
+#include <vector>
 #include "../PartitionAlloc.h"
-
-// This program should result in the following ASSERT
-// ASSERTION FAILED: *cookiePtr == root->kCookieValue[i]
 
 #define BUFFER_SIZE 128
 
@@ -13,7 +9,16 @@ void run_test() {
 	void *gp = new_generic_partition();
 	void *p = generic_partition_alloc(gp, BUFFER_SIZE);
 	ASSERT(p);
-	memset(p, 0x41, BUFFER_SIZE*2);
+	// Should return 0
+	int ret = check_partition_pointer(p);
+	ASSERT(!ret);
+
+	char *d = (char *) malloc(128);
+	// Should assert and crash
+	ret = check_partition_pointer(d);
+	ASSERT(!ret);
+	free(d);
+
 	generic_partition_free(gp, p);
 	delete_generic_partition(gp);
 }

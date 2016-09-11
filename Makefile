@@ -25,6 +25,7 @@ library:
 
 tests: library
 	$(CXX) $(CXXFLAGS) $(DEBUG) tests/pa_test.cpp build/partitionalloc.so -o build/pa_test
+	$(CXX) $(CXXFLAGS) $(DEBUG) tests/pointer_check.cpp build/partitionalloc.so -o build/pointer_check
 	$(CXX) $(CXXFLAGS) $(DEBUG) tests/linear_overflow.cpp build/partitionalloc.so -o build/linear_overflow
 
 clean:

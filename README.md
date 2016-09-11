@@ -60,6 +60,7 @@ This fork also includes a basic C API with the following interfaces:
 	* void partition_free_string(void *p) - Frees a memory allocation p from a global partition specifically for strings
 	* void *partition_malloc(size_t s) - Allocates s bytes from a global generic partition
 	* void partition_free(void *p) - Frees a memory allocation p from a global generic partition
+	* int check_partition_pointer(void *p) - Checks if p is a valid pointer with a partition (will assert if the check fails)
 
 The following additional things have been added:
 

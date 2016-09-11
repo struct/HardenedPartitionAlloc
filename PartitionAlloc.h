@@ -1060,6 +1060,13 @@ void *partition_realloc(void *p, size_t sz) {
 void partition_free(void *ptr) {
     partitionFreeGeneric(g_other_partition.root(), ptr);
 }
+
+// Checks if a pointer has a valid page/root structure
+// ASSERTS on failure or returns 0
+int check_partition_pointer(void *p) {
+    WTF::partitionPointerIsValid((uint8_t *) p - WTF::kCookieSize);
+    return 0;
+}
 }
 
 // A base class you can easily inherit from. Overloads
