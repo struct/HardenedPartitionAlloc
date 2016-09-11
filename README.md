@@ -1,6 +1,6 @@
 # Introduction
 
-This is a standalone library containing PartitionAlloc. It needs a lot of work and testing before it should be used on production code. This code is changing rapidly and should be considered unstable and untested until this notice is removed.
+This is a standalone library containing PartitionAlloc, the allocator used in Chrome's Blink engine. It needs a lot of work and testing before it should be used on production code. This code is changing rapidly and should be considered unstable and untested until this notice is removed.
 
 # PartitionAlloc
 
