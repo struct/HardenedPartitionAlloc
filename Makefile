@@ -19,6 +19,7 @@ CXXFLAGS = $(CFLAGS) -fPIC -fPIE $(LINUX_LDFLAGS)
 endif
 
 library:
+	@mkdir -p build
 	$(CXX) $(CXXFLAGS) $(DEBUG) AddressSpaceRandomization.cpp Assertions.cpp PageAllocator.cpp \
 		PartitionAlloc.cpp -shared $(LDFLAGS) -o build/partitionalloc.so
 
