@@ -324,11 +324,13 @@ struct WTF_EXPORT PartitionRootBase {
 
     // This is the maximum size of the delayed freelist (16)
     size_t delayed_free_list_max_sz;
+
     // A pointer to a vector of pointers we are waiting to free()
     std::vector<void *> delayed_free_list;
 
-    // User heap allocations have a canary before them
-    // This canary value is per-partition-root
+    // User heap allocations have a canary before and after them
+    // This canary value is per-partition-root and XOR'd by the
+    // the last byte of the address they're located at
     bool kCookieInitialized;
     unsigned char kCookieValue[WTF::kCookieSize];
 };
@@ -710,7 +712,6 @@ ALWAYS_INLINE void partitionFreeWithPage(void* ptr, PartitionPage* page, bool de
         // free list. Assert if it is
         for(auto p : prb->delayed_free_list) {
             RELEASE_ASSERT_WITH_SECURITY_IMPLICATION(p != ptr);
-//            if(ptr > )
         }
 
         if(prb->delayed_free_list.size() < prb->delayed_free_list_max_sz) {
