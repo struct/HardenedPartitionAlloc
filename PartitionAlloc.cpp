@@ -261,10 +261,6 @@ static bool partitionAllocBaseShutdown(PartitionRootBase* root)
     RELEASE_ASSERT_WITH_SECURITY_IMPLICATION(root->initialized);
     root->initialized = false;
 
-    for(auto p : root->delayed_free_list) {
-        partitionFreeWithPage(p, partitionPointerToPage(p), false);
-    }
-
     // Now that we've examined all partition pages in all buckets, it's safe
     // to free all our super pages. Since the super page extent entries are
     // stored in the super pages, we need to be careful not to access them
@@ -287,11 +283,17 @@ bool partitionAllocShutdown(PartitionRoot* root)
 {
     bool foundLeak = false;
     size_t i;
+
+    for(auto p : root->delayed_free_list) {
+        partitionFreeWithPage(p, partitionPointerToPage(p), false);
+    }
+
     for (i = 0; i < root->numBuckets; ++i) {
         PartitionBucket* bucket = &root->buckets()[i];
         foundLeak |= partitionAllocShutdownBucket(bucket);
     }
     foundLeak |= partitionAllocBaseShutdown(root);
+    printf("foundLeak = %d\n", foundLeak);
     return !foundLeak;
 }
 
@@ -299,6 +301,11 @@ bool partitionAllocGenericShutdown(PartitionRootGeneric* root)
 {
     bool foundLeak = false;
     size_t i;
+
+    for(auto p : root->delayed_free_list) {
+        partitionFreeWithPage(p, partitionPointerToPage(p), false);
+    }
+
     for (i = 0; i < kGenericNumBuckets; ++i) {
         PartitionBucket* bucket = &root->buckets[i];
         foundLeak |= partitionAllocShutdownBucket(bucket);
