@@ -483,8 +483,6 @@ ALWAYS_INLINE void partitionCookieWriteValue(void* ptr, PartitionPage *page)
 {
 #if ENABLE(ASSERT)
     unsigned char* cookiePtr = reinterpret_cast<unsigned char*>(ptr);
-    uint8_t x = (int) cookiePtr & 0xff;
-    printf("ptr=%p x=%02x\n", cookiePtr, x);
     PartitionRootBase* root = partitionPageToRoot(page);
     for (size_t i = 0; i < kCookieSize; ++i, ++cookiePtr) {
         *cookiePtr = root->kCookieValue[i];
