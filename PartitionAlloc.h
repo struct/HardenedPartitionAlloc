@@ -969,6 +969,12 @@ void *generic_partition_alloc(void *p, size_t sz) {
     return (void *) partitionAllocGeneric(np->root(), sz);
 }
 
+// C wrapper for reallocating from a generic partition
+void *generic_partition_realloc(void *p, void *t, size_t sz) {
+    PartitionAllocatorGeneric *np = reinterpret_cast<PartitionAllocatorGeneric *>(p);
+    return (void *) partitionReallocGeneric(np->root(), t, sz);
+}
+
 // C wrapper for freeing from a generic partition
 void generic_partition_free(void *p, void *m) {
     PartitionAllocatorGeneric *np = reinterpret_cast<PartitionAllocatorGeneric *>(p);
@@ -1030,6 +1036,11 @@ void *partition_malloc_string(size_t sz) {
     return partitionAllocGeneric(g_string_partition.root(), sz);
 }
 
+// Reallocate memory for a string
+void *partition_realloc_string(void *p, size_t sz) {
+    return partitionReallocGeneric(g_string_partition.root(), p, sz);
+}
+
 // Free memory for a string
 void partition_free_string(void *ptr) {
     partitionFreeGeneric(g_string_partition.root(), ptr);
@@ -1038,6 +1049,11 @@ void partition_free_string(void *ptr) {
 // Allocate memory for other objects
 void *partition_malloc(size_t sz) {
     return partitionAllocGeneric(g_other_partition.root(), sz);
+}
+
+// Reallocate memory for other objects
+void *partition_realloc(void *p, size_t sz) {
+    return partitionReallocGeneric(g_string_partition.root(), p, sz);
 }
 
 // Free memory for other objects

@@ -68,9 +68,13 @@ void run_test() {
 
 	p = partition_malloc_string(128);
 	ASSERT(p);
+	p = partition_realloc_string(p, 128);
+	ASSERT(p);
 	partition_free_string(p);
 
 	p = partition_malloc(512);
+	ASSERT(p);
+	p = partition_realloc(p, 550);
 	ASSERT(p);
 	partition_free(p);
 
@@ -82,6 +86,8 @@ void run_test() {
 
 	void *gp = new_generic_partition();
 	p = generic_partition_alloc(gp, 128);
+	ASSERT(p);
+	p = generic_partition_realloc(gp, p, 256);
 	ASSERT(p);
 	generic_partition_free(gp, p);
 	delete_generic_partition(gp);
