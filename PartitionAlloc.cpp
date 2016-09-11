@@ -293,7 +293,6 @@ bool partitionAllocShutdown(PartitionRoot* root)
         foundLeak |= partitionAllocShutdownBucket(bucket);
     }
     foundLeak |= partitionAllocBaseShutdown(root);
-    printf("foundLeak = %d\n", foundLeak);
     return !foundLeak;
 }
 

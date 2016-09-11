@@ -484,8 +484,9 @@ ALWAYS_INLINE void partitionCookieWriteValue(void* ptr, PartitionPage *page)
 #if ENABLE(ASSERT)
     unsigned char* cookiePtr = reinterpret_cast<unsigned char*>(ptr);
     PartitionRootBase* root = partitionPageToRoot(page);
+    uint8_t x = (uintptr_t) cookiePtr & 0xff;
     for (size_t i = 0; i < kCookieSize; ++i, ++cookiePtr) {
-        *cookiePtr = root->kCookieValue[i];
+        *cookiePtr = root->kCookieValue[i] ^ x;
     }
 #endif
 }
@@ -494,9 +495,10 @@ ALWAYS_INLINE void partitionCookieCheckValue(void* ptr, PartitionPage *page)
 {
 #if ENABLE(ASSERT)
     unsigned char* cookiePtr = reinterpret_cast<unsigned char*>(ptr);
+    uint8_t x = (uintptr_t) cookiePtr & 0xff;
     PartitionRootBase* root = partitionPageToRoot(page);
     for (size_t i = 0; i < kCookieSize; ++i, ++cookiePtr) {
-        RELEASE_ASSERT_WITH_SECURITY_IMPLICATION(*cookiePtr == root->kCookieValue[i]);
+        RELEASE_ASSERT_WITH_SECURITY_IMPLICATION(*cookiePtr == (root->kCookieValue[i] ^ x));
     }
 #endif
 }
