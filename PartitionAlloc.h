@@ -942,10 +942,12 @@ using WTF::partitionAllocGetSize;
 // Hardened PartitionAlloc C API
 extern "C" {
 
-// Size specific partitions (bins) for common allocations
+// Size specific partitions/slots for common allocations
 // These templates define the maximum size allocation that
 // can occur within them. We account for the kCookieSize*2
-// because cookies are enabled within user allocations
+// because cookies are enabled within user allocations and
+// ensure we properly calculate the index into root->buckets
+// later when we go to allocate memory within these partitions
 static SizeSpecificPartitionAllocator<64+(WTF::kCookieSize*2)+8>  _PA;
 static SizeSpecificPartitionAllocator<128+(WTF::kCookieSize*2)+8> __PA;
 static SizeSpecificPartitionAllocator<256+(WTF::kCookieSize*2)+8> ___PA;

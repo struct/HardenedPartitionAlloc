@@ -6,14 +6,16 @@ UNAME := $(shell uname)
 CXX = clang++
 DEBUG = -ggdb
 ASAN = -fsanitize=address
-LDFLAGS = -ldl
+LINUX_LDFLAGS = -ldl
+MACOS_FLAGS = -framework CoreFoundation
+CFLAGS = -std=c++11 -Wall -pedantic -D_FORTIFY_SOURCE=2 -fstack-protector-all -DENABLE_ASSERT=1
 
 ifeq ($(UNAME), Darwin)
-CXXFLAGS = -std=c++11 -Wall -pedantic -D_FORTIFY_SOURCE=2 -fPIC -fstack-protector-all -DENABLE_ASSERT=1 -framework CoreFoundation
+CXXFLAGS = $(CFLAGS) -fPIC $(MACOS_FLAGS)
 endif
 
 ifeq ($(UNAME), Linux)
-CXXFLAGS = -std=c++11 -Wall -pedantic -D_FORTIFY_SOURCE=2 -fPIC -fstack-protector-all -DENABLE_ASSERT=1 $(LDFLAGS)
+CXXFLAGS = $(CFLAGS) -fPIC -fPIE $(LINUX_LDFLAGS)
 endif
 
 library:
