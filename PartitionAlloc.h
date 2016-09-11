@@ -708,6 +708,7 @@ ALWAYS_INLINE void partitionFreeWithPage(void* ptr, PartitionPage* page, bool de
         // free list. Assert if it is
         for(auto p : prb->delayed_free_list) {
             RELEASE_ASSERT_WITH_SECURITY_IMPLICATION(p != ptr);
+//            if(ptr > )
         }
 
         if(prb->delayed_free_list.size() < prb->delayed_free_list_max_sz) {
