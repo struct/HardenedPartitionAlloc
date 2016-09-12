@@ -1086,4 +1086,8 @@ class PartitionBackedBase {
     void operator delete(void *ptr) {
         partition_free_sz(ptr);
     }
+
+    int check_this_ptr() {
+        return check_partition_pointer(this);
+    }
 };
