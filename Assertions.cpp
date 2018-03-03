@@ -25,11 +25,11 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-// The vprintf_stderr_common function triggers this error in the Mac build.
-// Feel free to remove this pragma if this file builds on Mac.
+// If the vprintf_stderr_common function triggers an error in your
+// Mac build, then try adding this pragma.
 // According to http://gcc.gnu.org/onlinedocs/gcc-4.2.1/gcc/Diagnostic-Pragmas.html#Diagnostic-Pragmas
 // we need to place this directive before any data or functions are defined.
-#pragma GCC diagnostic ignored "-Wmissing-format-attribute"
+//#pragma GCC diagnostic ignored "-Wmissing-format-attribute"
 
 #include "config.h"
 #include "Assertions.h"
@@ -64,6 +64,7 @@
 #include <cxxabi.h>
 #include <dlfcn.h>
 #include <execinfo.h>
+#include <os/log.h>
 #endif
 
 #if OS(LINUX)
@@ -95,9 +96,13 @@ static void vprintf_stderr_common(const char* format, va_list args)
         CFStringGetCString(str, buffer, length, kCFStringEncodingUTF8);
 
 #if USE(APPLE_SYSTEM_LOG)
-        asl_log(0, 0, ASL_LEVEL_NOTICE, "%s", buffer);
+        os_log(OS_LOG_DEFAULT, "%s", buffer);
 #endif
         fputs(buffer, stderr);
+
+#if HPA_DEBUG
+        fprintf(stdout, "%s", buffer);
+#endif
 
         free(buffer);
         CFRelease(str);
@@ -108,7 +113,19 @@ static void vprintf_stderr_common(const char* format, va_list args)
 #if USE(APPLE_SYSTEM_LOG)
     va_list copyOfArgs;
     va_copy(copyOfArgs, args);
-    asl_vlog(0, 0, ASL_LEVEL_NOTICE, format, copyOfArgs);
+
+    size_t size = 1024;
+    char *buffer = (char *) malloc(size);
+
+    vsnprintf(buffer, size, format, args);
+    os_log(OS_LOG_DEFAULT, "%s", (const char *) buffer);
+
+#if HPA_DEBUG
+        fprintf(stdout, "%s", buffer);
+#endif
+
+    free(buffer);
+
     va_end(copyOfArgs);
 #endif
 
@@ -121,7 +138,7 @@ static void vprintf_stderr_common(const char* format, va_list args)
         size_t size = 1024;
 
         do {
-            char* buffer = (char*)malloc(size);
+            char *buffer = (char *) malloc(size);
 
             if (buffer == NULL)
                 break;
@@ -132,12 +149,14 @@ static void vprintf_stderr_common(const char* format, va_list args)
                 break;
             }
 
+#if HPA_DEBUG
+        fprintf(stdout, "%s", buffer);
+#endif
             free(buffer);
             size *= 2;
         } while (size > 1024);
     }
 #endif
-    vfprintf(stderr, format, args);
 }
 
 #if COMPILER(CLANG) || (COMPILER(GCC) && GCC_VERSION_AT_LEAST(4, 6, 0))

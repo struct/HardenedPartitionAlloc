@@ -26,21 +26,21 @@ The following changes have been made to the original PartitionAlloc code base.
 
 	* Randomization of the freelist upon creation
 	* Freelist entries are randomly selected upon allocation
-	* Allocations are preceeded by a canary value that is unique per-partition and XOR'd by the last byte of the address of where it resides in memory
+	* Allocated slots are surrounded by a canary value that is unique per-partition and XOR'd by the last byte of its address
 	* New allocations are memset with 0xDE
 	* All freelist pointers are checked for a valid page mask and root inverted self value
 
 ## Free
 
-	* Free'd allocations have their user data memset before they're added to delayed free list
-	* Better double free detection upon free
-	* Delayed free via a vector stored with the partition root
+	* Delayed free of all user allocations using a vector stored with the partition root
+	* Free'd allocations have their user data memset before they're added to the delayed free list
+	* Better double free detection
 
 ## Design
 
-Some of the changes made to PartitionAlloc for security were thought through and the result of years of exploit writing. Others were made on a whim because they seemed like a good idea, I told you this wasn't ready for primetime yet 8)
+Some of the changes made to PartitionAlloc for security were thought through and the result of years of exploit writing. Others were made on a whim because they seemed like a good idea.
 
-The delayed free list is a std::vector stored within the partition root itself. This location was chosen for mainly two reasons: 1) To keep the PartitionPage and PartitionBucket structures at their current size and 2) To keep a separate freelist per-partition. The latter, in theory, helps with performance but I have no hard data to back that up.
+The delayed free list is a std::vector stored within the partition root itself. This location was chosen for mainly two reasons: 1) To keep the PartitionPage and PartitionBucket structures at their current size and 2) To keep a separate freelist per-partition. The latter, in theory, helps with performance but I have no data to prove this.
 
 The user data canary secret value is also stored in the partition root itself which means that each root has its own unique canary value. Each canary written to the beginning and end of a user allocation is XOR'd by the last byte of the address of where it resides in memory. This may change in the future as I research more into memory disclosure attacks against PartitionAlloc.
 
@@ -92,6 +92,7 @@ This is a work in progress and I would like to reach a stable release at some po
 	* More efficient double free detection
 	* Document other security relevant asserts
 	* Research memalign support https://github.com/struct/HardenedPartitionAlloc/issues/1
+	* Hardening patches are untested on Windows
 
 # Who
 
